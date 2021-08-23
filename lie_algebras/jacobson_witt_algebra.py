@@ -63,7 +63,7 @@ class JWitt:
         # Calculates a component in the Lie bracket
         epsilon = [0 if i + 1 != epsilon else 1 for i in range(self.m)]
         n = [a[i] + b[i] - epsilon[i] for i in range(self.m)]
-        if any(i >= self.p for i in n):
+        if any(i < 0 or i >= self.p for i in n):
             return 0
         binom = self.mod_p(numpy.prod([binomial(n[i], a[i]) for i in range(self.m)]))
         return binom * self.element_conversion(n, d)
