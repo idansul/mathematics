@@ -35,24 +35,11 @@ class JWitt:
     
     def coefs_mod_p(self, element):
         # Operates Modulo p on the coefficients of a general element in the algebra
-        decomposed = re.split("([+-])", str(element))
-        decomposed = list(map(str.strip, decomposed))
+        decomposed = re.split("(?=[-+])", str(element))
         if decomposed[0] == "":
             decomposed = decomposed[1:]
-        i = 0
-        mod_element = 0
-        if decomposed[0] != "+" and decomposed[0] != "-":
-            component_coef, component_exp, component_d = self.decompose(decomposed[0])
-            mod_element += (component_coef % self.p) * self.element_conversion(component_exp, component_d)
-            i += 1
-        while i < len(decomposed):
-            component_coef, component_exp, component_d = self.decompose(decomposed[i + 1])
-            if decomposed[i] == "+":
-                mod_element += (component_coef % self.p) * self.element_conversion(component_exp, component_d)
-            else:
-                mod_element += (-component_coef % self.p) * self.element_conversion(component_exp, component_d)
-            i += 2
-        return mod_element
+        decomposed = list(map(lambda x: str(eval(x)), decomposed))
+        return sum(list(map(lambda x: numpy.prod(self.get_coef(x)), decomposed)))
     
     def element_conversion(self, exp, d):
         # Converts an exponent vector and a derivarion index into a corresponding element
