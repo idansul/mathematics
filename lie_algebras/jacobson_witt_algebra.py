@@ -38,7 +38,7 @@ class JWitt:
         decomposed = re.split("(?=[-+])", str(element))
         if decomposed[0] == "":
             decomposed = decomposed[1:]
-        decomposed = list(map(lambda x: str(eval(x)), decomposed))
+        decomposed = list(map(eval, decomposed))
         return sum(list(map(lambda x: numpy.prod(self.get_coef(x)), decomposed)))
     
     def element_conversion(self, exp, d):
@@ -65,6 +65,8 @@ class JWitt:
         decomposed = str(element).split("*", 1)
         if isinstance(eval(decomposed[0]), int):
             return eval(decomposed[0]) % self.p, eval(decomposed[1])
+        elif decomposed[0][0] == "-":
+            return self.p - 1, -element
         return 1, element
     
     def get_exp(self, monomial):
