@@ -18,24 +18,11 @@ class Witt:
         
     def coefs_mod_p(self, element):
         # Operates Modulo p on the coefficients of a general element in the algebra
-        decomposed = re.split("([+-])", str(element))
-        decomposed = list(map(str.strip, decomposed))
+        decomposed = re.split("(?=[-+])", str(element))
         if decomposed[0] == "":
             decomposed = decomposed[1:]
-        i = 0
-        mod_element = 0
-        if decomposed[0] != "+" and decomposed[0] != "-":
-            component_coef, component_exp = self.decompose(decomposed[0])
-            mod_element += (component_coef % self.p) * self.x ** component_exp * self.D
-            i += 1
-        while i < len(decomposed):
-            component_coef, component_exp = self.decompose(decomposed[i + 1])
-            if decomposed[i] == "+":
-                mod_element += (component_coef % self.p) * self.x ** component_exp * self.D
-            else:
-                mod_element += (-component_coef % self.p) * self.x ** component_exp * self.D
-            i += 2
-        return mod_element
+        decomposed = list(map(eval, decomposed))
+        return sum(list(map(lambda x: numpy.prod(self.get_coef(x)), decomposed)))
 
     def component_calc(self, a, b):
         # Calculates a component in the Lie bracket
@@ -54,6 +41,8 @@ class Witt:
         decomposed = str(element).split("*", 1)
         if isinstance(eval(decomposed[0]), int):
             return eval(decomposed[0]) % self.p, eval(decomposed[1])
+        elif decomposed[0][0] == "-":
+            return self.p - 1, -element
         return 1, element
     
     def get_exp(self, monomial):
