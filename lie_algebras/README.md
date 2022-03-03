@@ -6,3 +6,5 @@
 - `automorphisms.py` is for automorphisms computations.
 - `functions.py` contains some useful searching functions.
 - Libraries to install: SymPy, NumPy.
+### Web application
+https://share.streamlit.io/idansul/mathematics/main/lie_algebras/web_app.py
