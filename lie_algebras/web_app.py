@@ -17,7 +17,6 @@ def lie_brackets():
     with c2:
         B = st.text_input('B:')
     if A and B:
-        st.latex(A)
         st.latex(jwitt.lie(A, B))
 
 def sidebar():
