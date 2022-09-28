@@ -22,7 +22,7 @@ class Aut:
 #         autos.extend(self.truncated_autos2())
 #         autos.extend(self.truncated_autos3())
 #         autos.extend(self.truncated_autos4())
-#         autos.extend(self.truncated_autos5())
+        autos.extend(self.truncated_autos5())
         return autos
     
     def truncated_autos(self):
@@ -50,7 +50,7 @@ class Aut:
         return autos
     
     def truncated_autos3(self):
-        # Elementary automorphisms of the form x_1 goes to x_1 + f(x_2) and the rest go to themselves; and exchanging x_1 with x_2
+        # Elementary automorphisms of the form x_1 goes to x_1 + f(x_2) when f is without free terms and the rest go to themselves; and exchanging x_1 with x_2
         autos = []
         for prod in product(range(self.ring.p), repeat=self.ring.p - 1):
             x_1_add_fx_2 = [x_1 + np.dot(prod, [x_2**i for i in range(1, self.ring.p)])] + self.ring.x[1:]
@@ -71,12 +71,16 @@ class Aut:
         return autos
     
     def truncated_autos5(self):
-        # Automorphisms of the form x_i goes to x_i + f(x_i) when f is without free term
+        # Automorphisms of the form x_1 goes to x_1 + f(x_2) and x_2 goes to x_2 + g(x_1) when f, g are without free terms
         autos = []
-        for prod in product(product(range(self.ring.p), repeat=self.ring.p - 1), repeat=self.ring.m):
-            mapping = list(map(lambda x, p: np.dot(p, [x**i for i in range(1, self.ring.p)]), self.ring.x, prod))
-            if self.is_auto(mapping):
-                autos.append(tuple(mapping))
+        for prod1 in product(range(self.ring.p), repeat=self.ring.p - 1):
+            x_1_add_fx_2 = x_1 + np.dot(prod1, [x_2**i for i in range(1, self.ring.p)])
+            for prod2 in product(range(self.ring.p), repeat=self.ring.p - 1):
+                if random.random() > 0.9:
+                    x_2_add_fx_1 = x_2 + np.dot(prod2, [x_1**i for i in range(1, self.ring.p)])
+                    mapping = [x_1_add_fx_2, x_2_add_fx_1]
+                    if self.is_auto(mapping):
+                        autos.append(tuple(mapping))
         return autos
     
     def get_J_matrix(self, mapping, show_matrix=False):
