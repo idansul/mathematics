@@ -5,22 +5,23 @@ import matplotlib.pyplot as plt
 x, D, a, b = symbols("x, D, a, b")
 
 
-def elements_search_histogram(lie):
-    # Finds the single brackets of all the elements in the algebra and returns them with a histogram of the steps
+def elements_search_histogram(algebra, left_removals=[None], right_removals=[None]):
+    # Finds the single brackets of all the elements in the algebra and returns them with a histogram of the steps and the increase indexes
     histogram = {0:0}
     elements = []
-    cardinality = lie.p ** lie.p
+    increase_indexes = []
+    cardinality = algebra.p ** algebra.dimension
     for i in range(1, cardinality):
-        if search_skip(i, lie.p, histogram):
-            continue
-        chunk = lie.get_all_elements_dict(start=i, stop=i+1)
+        chunk = algebra.get_all_elements_dict(start=i, stop=i+1, left_removals=left_removals, right_removals=right_removals)
         chunk = list(set(chunk.values()) - set(elements))
         elements.extend(chunk)
         histogram[i] = len(elements)
+        if histogram[i] - histogram[i-1]:
+            increase_indexes.append(i)
         print(i, len(elements))
         if len(elements) == cardinality:
             break
-    return elements, histogram
+    return elements, histogram, increase_indexes
 
 def search_skip(i, p, hist):
     # Skips every p elements or when new elements are found in the search process
@@ -36,6 +37,9 @@ def esh_plot(esh, plot_type="plot"):
     # Plots the histogram of the elements search
     index, count = zip(*esh.items())
     eval(f"plt.{plot_type}(index, count)")
+    plt.title("Brackets search histogram")
+    plt.xlabel("Iterations")
+    plt.ylabel("Number of elements")
     plt.show()
     
 def is_component(components, element):
