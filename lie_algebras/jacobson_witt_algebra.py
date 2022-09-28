@@ -28,6 +28,30 @@ class JWitt(TruncatedPolyRing):
             monomials.append(np.prod(mon))
         return [monomial * D for D in self.D for monomial in monomials]
     
+    def get_vector_presentation(self, element):
+        # Gets the vector presentation of an element with respect to the basis
+        element_vector = [0]*self.dimension
+        for summand in self.get_summands(element):
+            coefficient, basis_element = self.get_coef(summand)
+            if basis_element:
+                element_vector[self.basis.index(basis_element)] = coefficient
+        return element_vector
+    
+    def vector_to_element(self, vector):
+        # Transforms a vector presentation to its corresponding element
+        return np.dot(vector, self.basis)
+    
+    def create_SC_table(self):
+        # Creates structure constants table: if {e_i} is the basis, [e_i,e_j] = sum c_{ijk}*e_k; c_{ijk} are the structure constants
+        sc_table = []
+        for e_i in self.basis:
+            c_i_row = []
+            for e_j in self.basis:
+                c_ij = self.lie(e_i, e_j)
+                c_i_row.append(self.get_vector_presentation(c_ij))
+            sc_table.append(c_i_row)
+        self.sc_table = sc_table
+    
     def extract_derivation(self, element):
         # Gets an element from the algebra and returns its polynomial and derivation components separately
         if element:
@@ -86,32 +110,31 @@ class JWitt(TruncatedPolyRing):
         result = None
         results = {}
         for i in islice(product(*M), start, stop):
-            i = [t for t in i if t != 0]
+            left = sum(i)
             for j in islice(product(*M), 1, None):
-                j = [t for t in j if t != 0]
-                result = self.lie(i, j)
+                right = sum(j)
+                result = self.lie(left, right)
                 if verbose:
-                    print(f"[{str(i)}, {str(j)}] =", result)
+                    print(f"[{str(left)}, {str(right)}] =", result)
                 if result in elements:
                     if verbose_result:
-                        left_element = " +".join(re.split(",", str(i)[1:-1]))
-                        right_element = " +".join(re.split(",", str(j)[1:-1]))
-                        print(f"A bracket was found: [{left_element}, {right_element}] = {result}")
-                    results[(tuple(i), tuple(j))] = result
+                        print(f"A bracket was found: [{left}, {right}] = {result}")
+                    results[tuple([left, right])] = result
                     elements.remove(result)
                 if not elements:
-                    print(f"All of the brackets have been found in the slice [start={start}, stop={stop}]")
+                    print(f"All of the brackets were found in the slice [start={start}, stop={stop}]")
                     return results
         print(f"The brackets for the following elements could not be found in the slice [start={start}, stop={stop}]: {elements}")
         if results:
             return results
     
-    def get_all_elements_dict(self, start=1, stop=None, slices=None):
+    def get_all_elements_dict(self, start=1, stop=None, slices=None, left_removals=[None], right_removals=[None]):
         # Gets a dictionary of all unique elements that are presentable by a single bracket
-        M = [[i*bs for i in range(self.p)] for bs in self.basis]
+        M_left = [[i*bs for i in range(self.p)] for bs in self.basis if bs not in left_removals]
+        M_right = [[i*bs for i in range(self.p)] for bs in self.basis if bs not in right_removals]
         result = None
         results = {}
-        for index, left in enumerate(islice(product(*M), start, stop)):
+        for index, left in enumerate(islice(product(*M_left), start, stop)):
             if slices:
                 if index + 1 not in slices:
                     continue
@@ -119,12 +142,14 @@ class JWitt(TruncatedPolyRing):
                     print(index + 1, len(results))
                 if index + 1 > max(slices):
                     break
-            left = [element for element in left if element != 0]
-            for right in islice(product(*M), 1, None):
-                right = [element for element in right if element != 0]
+            left = sum(left)
+            for right in islice(product(*M_right), 1, None):
+                right = sum(right)
                 result = self.lie(left, right)
                 if result not in results.values():
-                    results[(tuple(left), tuple(right))] = result
+                    results[tuple([left, right])] = result
+                if len(results) == self.p ** self.dimension:
+                    return results
         return results
     
     def epsilon_variations_calc(self, exponents):
