@@ -22,7 +22,7 @@ class Witt:
         if decomposed[0] == "":
             decomposed = decomposed[1:]
         decomposed = list(map(eval, decomposed))
-        return sum(list(map(lambda x: numpy.prod(self.get_coef(x)), decomposed)))
+        return sum(list(map(lambda x: np.prod(self.get_coef(x)), decomposed)))
 
     def component_calc(self, a, b):
         # Calculates a component in the Lie bracket
@@ -131,4 +131,32 @@ class Witt:
                 result = self.lie(left, right)
                 if result not in results.values():
                     results[(tuple(left), tuple(right))] = result
+        return results
+    
+    def new_get_all_elements_dict(self, start=1, stop=None, slices=None):
+        M = [[i*bs for i in range(self.p)] for bs in self.basis]
+        result = None
+        results = {}
+        for index, left in enumerate(islice(product(range(2), repeat=self.p), start, stop)):
+            if slices:
+                if index + 1 not in slices:
+                    continue
+                else:
+                    print(index + 1, len(results))
+                if index + 1 > max(slices):
+                    break
+            left_comp = [left[i] * self.basis[i] for i in range(self.p) if left[i] != 0]
+            print(left_comp)
+            if index == 4: ## CONDITION
+                nonzero_index = left.index(1)
+                for j in range(2, self.p):
+                    multi_left_comp = copy.deepcopy(left_comp)
+                    multi_left_comp[nonzero_index] *= j
+                    print(multi_left_comp) ## DO SOMETHING
+            for right in islice(product(*M), 1, None):
+                right_comp = [element for element in right if element != 0]
+                print(right, right_comp)
+                result = self.lie(left_comp, right_comp)
+                if result not in results.values():
+                    results[(tuple(left_comp), tuple(right_comp))] = result
         return results
