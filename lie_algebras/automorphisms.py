@@ -2,6 +2,7 @@ from sympy import symbols, Matrix, diff, Poly, expand
 import numpy as np
 from itertools import islice, product
 from jacobson_witt_algebra import JWitt
+import random
 
 x_1, x_2, D_1, D_2 = symbols("x_1, x_2, D_1, D_2")
 
