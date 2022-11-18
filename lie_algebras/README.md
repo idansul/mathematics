@@ -11,4 +11,4 @@
 - `misc_solvers.py` contains some more tools to solve linear systems either with a more manual fashion or using Gröbner bases (the latter requires Sage).
 - Most of the tools in this section require the package SageMath 9.3 which is used as a Python notebook interface, see: https://www.sagemath.org/download.html. When the computer algebra system GAP is used it is loaded from the Sage package.
 ### Web application
-https://share.streamlit.io/idansul/mathematics/main/lie_algebras/web_app.py
+https://lie-algebras.streamlit.app
